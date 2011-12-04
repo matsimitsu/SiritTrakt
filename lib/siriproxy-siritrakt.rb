@@ -25,8 +25,6 @@ class SiriProxy::Plugin::SiriTrakt < SiriProxy::Plugin
   end
 
   listen_for /what's on tv tonight/i do
-  	#Search for the movie and get the rating as a string
-
     send_object self.generate_calendar_response(last_ref_id)
     request_completed
   end
