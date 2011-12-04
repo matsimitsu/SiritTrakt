@@ -12,12 +12,6 @@ class SiriProxy::Plugin::SiriTrakt < SiriProxy::Plugin
     Trakt::password = config['trakt_password']
   end
 
-  def getCalendar
-   	calendar = Trakt::User::Calendar.new
-    results = calendar.results
-  	return results
-  end
-
   def generate_calendar_response(ref_id)
     object = SiriAddViews.new
     object.make_root(ref_id)
@@ -32,7 +26,6 @@ class SiriProxy::Plugin::SiriTrakt < SiriProxy::Plugin
 
   listen_for /what's on tv tonight/i do
   	#Search for the movie and get the rating as a string
-  	calendar = getCalendar
 
     send_object self.generate_calendar_response(last_ref_id)
     request_completed
