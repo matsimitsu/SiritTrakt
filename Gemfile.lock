@@ -1,0 +1,20 @@
+PATH
+  remote: .
+  specs:
+    siriproxy-siritrakt (0.0.1)
+      typhoeus
+      yajl-ruby
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    mime-types (1.17.2)
+    typhoeus (0.3.3)
+      mime-types
+    yajl-ruby (1.1.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  siriproxy-siritrakt!

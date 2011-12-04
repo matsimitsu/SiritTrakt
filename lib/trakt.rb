@@ -1,51 +1,45 @@
-require 'curb'
+require 'typhoeus'
 require 'yajl'
+require 'date'
 
 module Trakt
-  class Base
-
-    attr_accessor :results
-    class << self
-      attr_accessor  :username, :password, :api_key
-    end
 
   def self.base_url
     "http://api.trakt.tv"
   end
 
-  def base_url
-    Trakt::base_url
+  class << self
+    attr_accessor  :username, :password, :api_key
   end
 
-  def request
-    c = Curl::Easy.new(url)
-    c.http_auth_types = :basic
-    if self.username && self.password
-      c.username = Trakt::username
-      c.password = Trakt::password
+  class Base
+    attr_accessor :results
+
+    def initialize()
+      self.results = request
     end
-    c.perform
-    parser = Yajl::Parser.new
-    parser.parse(c.body_str)
-  end
 
+    def base_url
+      Trakt::base_url
+    end
+
+    def request
+      response = Typhoeus::Request.get(url)
+      parser = Yajl::Parser.new
+      parser.parse(response.body)
+    end
+  end
 
   module User
 
-    class Base < Trakt::Base
-
-      def initialize()
-        self.results = request
-      end
-
-    end
-
-    class Calendar < Trakt::User::Base
+    class Calendar < Trakt::Base
 
       def url
-        "#{base_url}/user/calendar/shows.json/#{Trakt::api_key}/#{Trakt::username}"
+        "#{base_url}/user/calendar/shows.json/#{Trakt::api_key}/#{Trakt::username}/#{Date.today.to_s}/1"
       end
 
     end
+
   end
+
 end

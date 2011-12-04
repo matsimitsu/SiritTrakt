@@ -20,6 +20,6 @@ Gem::Specification.new do |s|
   # specify any dependencies here; for example:
   # s.add_development_dependency "rspec"
   # s.add_runtime_dependency "rest-client"
-  s.add_runtime_dependency "curb"
-  s.add_runtime_dependency 'yajl'
+  s.add_runtime_dependency "typhoeus"
+  s.add_runtime_dependency 'yajl-ruby'
 end
