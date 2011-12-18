@@ -12,9 +12,33 @@ class SiriProxy::Plugin::SiriTrakt < SiriProxy::Plugin
     Trakt::password = config['trakt_password']
   end
 
-  def generate_calendar_response(ref_id)
+  def parse_number(str)
+    numbers = {
+      'one' => 1,
+      'two' => 2,
+      'three' => 3,
+      'four' => 4,
+      'five' => 5,
+      'six' => 6,
+      'seven' => 7,
+      'eight' => 8,
+      'nine' => 9,
+      'ten' => 10
+    }
+    return numbers[str] || str.to_i
+  end
+
+  listen_for /i just saw season (.*) episode (.*) of (.*)/i do |season, episode, show|
+    puts "Marking S#{parse_number(season)} E#{parse_number(episode)} of #{show} as seen"
+    request = Trakt::Show::Episode::Seen.new(parse_number(season), parse_number(episode), show)
+
+    say request.results['message']
+    request_completed
+  end
+
+  listen_for /what's on tv tonight/i do
     object = SiriAddViews.new
-    object.make_root(ref_id)
+    object.make_root(last_ref_id)
     object.views << SiriAssistantUtteranceView.new("Here is your trakt calendar!")
 
     episodes = Trakt::User::Calendar.new.results.first['episodes']
@@ -22,10 +46,7 @@ class SiriProxy::Plugin::SiriTrakt < SiriProxy::Plugin
       object.views << SiriAssistantUtteranceView.new(calendar_result['show']['title'])
     end
     object
-  end
-
-  listen_for /what's on tv tonight/i do
-    send_object self.generate_calendar_response(last_ref_id)
+    send_object object
     request_completed
   end
 

@@ -1,6 +1,8 @@
 require 'typhoeus'
 require 'yajl'
 require 'date'
+require 'digest/sha1'
+require 'cgi'
 
 module Trakt
 
@@ -36,6 +38,70 @@ module Trakt
 
       def url
         "#{base_url}/user/calendar/shows.json/#{Trakt::api_key}/#{Trakt::username}/#{Date.today.to_s}/1"
+      end
+
+    end
+
+  end
+
+  module Show
+
+    class Search < Trakt::Base
+
+      attr_accessor :query
+
+      def initialize(query)
+        self.query = CGI::escape(query)
+        self.results = request
+      end
+
+      def url
+        "#{base_url}/search/shows.json/#{Trakt::api_key}/#{query}"
+      end
+
+      def tvdb_id
+        results.first['tvdb_id']
+      end
+
+    end
+
+    module Episode
+
+      class Seen < Trakt::Base
+
+        attr_accessor :season, :episode, :show
+
+        def initialize(season, episode, show)
+          self.season, self.episode, self.show = season, episode, show
+          self.results = request
+        end
+
+        def request
+          response = Typhoeus::Request.post(
+            url,
+            :body => body
+          )
+          parser = Yajl::Parser.new
+          parser.parse(response.body)
+        end
+
+        def url
+          "#{base_url}/show/episode/seen/#{Trakt::api_key}"
+        end
+
+        def body
+          Yajl::Encoder.encode({
+            :username => Trakt::username,
+            :password => Digest::SHA1.hexdigest(Trakt::password),
+            :tvdb_id => Trakt::Show::Search.new(show).tvdb_id,
+            :episodes => [
+              {
+                :season => season,
+                :episode => episode
+              }
+            ]
+          })
+        end
       end
 
     end
